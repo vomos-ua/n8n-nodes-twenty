@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"strict": true,
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"target": "es2019",
+		"lib": ["es2019"],
+		"declaration": true,
+		"skipLibCheck": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"outDir": "./dist",
+		"rootDir": ".",
+		"baseUrl": ".",
+		"paths": {
+			"n8n-workflow": ["./node_modules/n8n-workflow"]
+		}
+	},
+	"include": ["nodes/**/*.ts", "credentials/**/*.ts"],
+	"exclude": ["node_modules/**", "dist/**"]
+}

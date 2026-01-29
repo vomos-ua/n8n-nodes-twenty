@@ -1,0 +1,22 @@
+{
+	"node": "n8n-nodes-base.twentyCrm",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Sales"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://docs.twenty.com/developers/extend/capabilities/apis"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://docs.twenty.com/"
+			}
+		]
+	},
+	"alias": ["CRM", "Sales", "Contacts", "Companies", "Deals", "Pipeline"],
+	"subcategories": {
+		"Sales": ["CRM"]
+	}
+}
