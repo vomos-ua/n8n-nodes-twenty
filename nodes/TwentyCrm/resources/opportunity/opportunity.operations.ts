@@ -42,6 +42,12 @@ export const opportunityOperations: INodeProperties[] = [
 				description: 'Update an opportunity',
 				action: 'Update an opportunity',
 			},
+			{
+				name: 'Upsert',
+				value: 'upsert',
+				description: 'Create a new opportunity or update if exists (by name)',
+				action: 'Upsert an opportunity',
+			},
 		],
 		default: 'create',
 	},

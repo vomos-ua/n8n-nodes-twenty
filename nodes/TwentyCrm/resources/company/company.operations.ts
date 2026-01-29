@@ -42,6 +42,12 @@ export const companyOperations: INodeProperties[] = [
 				description: 'Update a company',
 				action: 'Update a company',
 			},
+			{
+				name: 'Upsert',
+				value: 'upsert',
+				description: 'Create a new company or update if exists (by domain name)',
+				action: 'Upsert a company',
+			},
 		],
 		default: 'create',
 	},

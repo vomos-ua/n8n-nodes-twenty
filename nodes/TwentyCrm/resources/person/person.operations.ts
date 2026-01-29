@@ -42,6 +42,12 @@ export const personOperations: INodeProperties[] = [
 				description: 'Update a person',
 				action: 'Update a person',
 			},
+			{
+				name: 'Upsert',
+				value: 'upsert',
+				description: 'Create a new person or update if exists (by email or LinkedIn)',
+				action: 'Upsert a person',
+			},
 		],
 		default: 'create',
 	},

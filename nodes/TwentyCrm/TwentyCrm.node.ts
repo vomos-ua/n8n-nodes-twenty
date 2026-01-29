@@ -14,15 +14,19 @@ import {
 	getResourceEndpoint,
 	cleanObject,
 	buildFilterQuery,
+	findRecordByField,
+	bulkOperation,
 } from './GenericFunctions';
 
 // Import resource definitions
+import { activityOperations, activityFields } from './resources/activity';
 import { companyOperations, companyFields } from './resources/company';
 import { personOperations, personFields } from './resources/person';
 import { opportunityOperations, opportunityFields } from './resources/opportunity';
 import { noteOperations, noteFields } from './resources/note';
 import { taskOperations, taskFields } from './resources/task';
 import { searchOperations, searchFields } from './resources/search';
+import { bulkOperations, bulkFields } from './resources/bulk';
 
 export class TwentyCrm implements INodeType {
 	description: INodeTypeDescription = {
@@ -53,6 +57,14 @@ export class TwentyCrm implements INodeType {
 				noDataExpression: true,
 				options: [
 					{
+						name: 'Activity',
+						value: 'activity',
+					},
+					{
+						name: 'Bulk Operations',
+						value: 'bulk',
+					},
+					{
 						name: 'Company',
 						value: 'company',
 					},
@@ -81,6 +93,10 @@ export class TwentyCrm implements INodeType {
 			},
 
 			// Operations and fields for each resource
+			...activityOperations,
+			...activityFields,
+			...bulkOperations,
+			...bulkFields,
 			...companyOperations,
 			...companyFields,
 			...personOperations,
@@ -106,6 +122,73 @@ export class TwentyCrm implements INodeType {
 		for (let i = 0; i < items.length; i++) {
 			try {
 				let responseData: IDataObject | IDataObject[];
+
+				// ----------------------------------------
+				//             activity
+				// ----------------------------------------
+				if (resource === 'activity') {
+					const endpoint = getResourceEndpoint('activity');
+
+					if (operation === 'create') {
+						const title = this.getNodeParameter('title', i) as string;
+						const type = this.getNodeParameter('type', i) as string;
+						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+
+						const body = cleanObject({
+							title,
+							type,
+							...additionalFields,
+						});
+
+						responseData = await twentyCrmApiRequest.call(this, 'POST', endpoint, body);
+					}
+
+					if (operation === 'delete') {
+						const activityId = this.getNodeParameter('activityId', i) as string;
+						responseData = await twentyCrmApiRequest.call(this, 'DELETE', `${endpoint}/${activityId}`);
+					}
+
+					if (operation === 'get') {
+						const activityId = this.getNodeParameter('activityId', i) as string;
+						responseData = await twentyCrmApiRequest.call(this, 'GET', `${endpoint}/${activityId}`);
+					}
+
+					if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const qs = buildFilterQuery(filters);
+
+						if (returnAll) {
+							responseData = await twentyCrmApiRequestAllItems.call(this, 'GET', endpoint, {}, qs);
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							qs.limit = limit;
+							const response = await twentyCrmApiRequest.call(this, 'GET', endpoint, {}, qs);
+							responseData = response.data || response;
+						}
+					}
+
+					if (operation === 'update') {
+						const activityId = this.getNodeParameter('activityId', i) as string;
+						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+
+						const body = cleanObject({
+							...additionalFields,
+							...updateFields,
+						});
+
+						if (Object.keys(body).length === 0) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'At least one field must be updated',
+								{ itemIndex: i },
+							);
+						}
+
+						responseData = await twentyCrmApiRequest.call(this, 'PUT', `${endpoint}/${activityId}`, body);
+					}
+				}
 
 				// ----------------------------------------
 				//             company
@@ -169,6 +252,37 @@ export class TwentyCrm implements INodeType {
 						}
 
 						responseData = await twentyCrmApiRequest.call(this, 'PUT', `${endpoint}/${companyId}`, body);
+					}
+
+					if (operation === 'upsert') {
+						const matchField = this.getNodeParameter('matchField', i) as string;
+						const matchValue = this.getNodeParameter('matchValue', i) as string;
+						const name = this.getNodeParameter('name', i) as string;
+						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+
+						// Try to find existing record
+						const existingRecord = await findRecordByField.call(this, 'company', matchField, matchValue);
+
+						const body = cleanObject({
+							name,
+							[matchField]: matchValue,
+							...additionalFields,
+						});
+
+						if (existingRecord && existingRecord.id) {
+							// Update existing record
+							responseData = await twentyCrmApiRequest.call(
+								this,
+								'PUT',
+								`${endpoint}/${existingRecord.id}`,
+								body,
+							);
+							(responseData as IDataObject)._upsertAction = 'updated';
+						} else {
+							// Create new record
+							responseData = await twentyCrmApiRequest.call(this, 'POST', endpoint, body);
+							(responseData as IDataObject)._upsertAction = 'created';
+						}
 					}
 				}
 
@@ -237,6 +351,39 @@ export class TwentyCrm implements INodeType {
 
 						responseData = await twentyCrmApiRequest.call(this, 'PUT', `${endpoint}/${personId}`, body);
 					}
+
+					if (operation === 'upsert') {
+						const matchField = this.getNodeParameter('matchField', i) as string;
+						const matchValue = this.getNodeParameter('matchValue', i) as string;
+						const firstName = this.getNodeParameter('firstName', i) as string;
+						const lastName = this.getNodeParameter('lastName', i) as string;
+						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+
+						// Try to find existing record
+						const existingRecord = await findRecordByField.call(this, 'person', matchField, matchValue);
+
+						const body = cleanObject({
+							firstName,
+							lastName,
+							[matchField]: matchValue,
+							...additionalFields,
+						});
+
+						if (existingRecord && existingRecord.id) {
+							// Update existing record
+							responseData = await twentyCrmApiRequest.call(
+								this,
+								'PUT',
+								`${endpoint}/${existingRecord.id}`,
+								body,
+							);
+							(responseData as IDataObject)._upsertAction = 'updated';
+						} else {
+							// Create new record
+							responseData = await twentyCrmApiRequest.call(this, 'POST', endpoint, body);
+							(responseData as IDataObject)._upsertAction = 'created';
+						}
+					}
 				}
 
 				// ----------------------------------------
@@ -301,6 +448,36 @@ export class TwentyCrm implements INodeType {
 						}
 
 						responseData = await twentyCrmApiRequest.call(this, 'PUT', `${endpoint}/${opportunityId}`, body);
+					}
+
+					if (operation === 'upsert') {
+						const matchField = this.getNodeParameter('matchField', i) as string;
+						const matchValue = this.getNodeParameter('matchValue', i) as string;
+						const name = this.getNodeParameter('name', i) as string;
+						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+
+						// Try to find existing record
+						const existingRecord = await findRecordByField.call(this, 'opportunity', matchField, matchValue);
+
+						const body = cleanObject({
+							name,
+							...additionalFields,
+						});
+
+						if (existingRecord && existingRecord.id) {
+							// Update existing record
+							responseData = await twentyCrmApiRequest.call(
+								this,
+								'PUT',
+								`${endpoint}/${existingRecord.id}`,
+								body,
+							);
+							(responseData as IDataObject)._upsertAction = 'updated';
+						} else {
+							// Create new record
+							responseData = await twentyCrmApiRequest.call(this, 'POST', endpoint, body);
+							(responseData as IDataObject)._upsertAction = 'created';
+						}
 					}
 				}
 
@@ -446,6 +623,76 @@ export class TwentyCrm implements INodeType {
 						const limit = this.getNodeParameter('limit', i) as number;
 
 						responseData = await twentyCrmSearchRecords.call(this, query, objectTypes, limit);
+					}
+				}
+
+				// ----------------------------------------
+				//             bulk
+				// ----------------------------------------
+				if (resource === 'bulk') {
+					const bulkResourceType = this.getNodeParameter('bulkResourceType', i) as string;
+
+					if (operation === 'bulkCreate') {
+						const bulkItemsJson = this.getNodeParameter('bulkItems', i) as string;
+						let bulkItems: IDataObject[];
+
+						try {
+							bulkItems = JSON.parse(bulkItemsJson);
+							if (!Array.isArray(bulkItems)) {
+								throw new Error('Items must be an array');
+							}
+						} catch (parseError) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'Invalid JSON format for bulk items',
+								{ itemIndex: i },
+							);
+						}
+
+						responseData = await bulkOperation.call(this, 'create', bulkResourceType, bulkItems);
+					}
+
+					if (operation === 'bulkUpdate') {
+						const bulkItemsJson = this.getNodeParameter('bulkItems', i) as string;
+						let bulkItems: IDataObject[];
+
+						try {
+							bulkItems = JSON.parse(bulkItemsJson);
+							if (!Array.isArray(bulkItems)) {
+								throw new Error('Items must be an array');
+							}
+							// Validate that each item has an ID
+							for (const item of bulkItems) {
+								if (!item.id) {
+									throw new Error('Each item must have an "id" field for update');
+								}
+							}
+						} catch (parseError) {
+							const errorMsg = parseError instanceof Error ? parseError.message : 'Invalid JSON';
+							throw new NodeOperationError(
+								this.getNode(),
+								errorMsg,
+								{ itemIndex: i },
+							);
+						}
+
+						responseData = await bulkOperation.call(this, 'update', bulkResourceType, bulkItems);
+					}
+
+					if (operation === 'bulkDelete') {
+						const bulkIds = this.getNodeParameter('bulkIds', i) as string;
+						const ids = bulkIds.split(',').map((id) => id.trim()).filter((id) => id);
+
+						if (ids.length === 0) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'At least one ID must be provided',
+								{ itemIndex: i },
+							);
+						}
+
+						const bulkItems = ids.map((id) => ({ id }));
+						responseData = await bulkOperation.call(this, 'delete', bulkResourceType, bulkItems);
 					}
 				}
 

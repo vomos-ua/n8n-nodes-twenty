@@ -1,6 +1,6 @@
 {
 	"name": "@linkedpromo/n8n-nodes-twenty",
-	"version": "0.2.2",
+	"version": "0.3.0",
 	"description": "n8n community node for Twenty CRM - Open Source CRM",
 	"keywords": [
 		"n8n-community-node-package",
@@ -42,7 +42,8 @@
 			"dist/credentials/TwentyCrmApi.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/TwentyCrm/TwentyCrm.node.js"
+			"dist/nodes/TwentyCrm/TwentyCrm.node.js",
+			"dist/nodes/TwentyCrm/TwentyCrmTrigger.node.js"
 		]
 	},
 	"devDependencies": {

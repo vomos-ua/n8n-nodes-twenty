@@ -1,6 +1,7 @@
 import type {
 	IDataObject,
 	IExecuteFunctions,
+	IHookFunctions,
 	IHttpRequestMethods,
 	ILoadOptionsFunctions,
 	IRequestOptions,
@@ -14,7 +15,7 @@ import type { ITwentyCrmCredentials } from './types';
  * Make an authenticated request to Twenty CRM API
  */
 export async function twentyCrmApiRequest(
-	this: IExecuteFunctions | ILoadOptionsFunctions,
+	this: IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions,
 	method: IHttpRequestMethods,
 	endpoint: string,
 	body: IDataObject = {},
@@ -182,7 +183,120 @@ export function getResourceEndpoint(resource: string): string {
 		opportunity: '/rest/opportunities',
 		note: '/rest/notes',
 		task: '/rest/tasks',
+		activity: '/rest/activities',
+		attachment: '/rest/attachments',
 	};
 
 	return endpoints[resource] || `/rest/${resource}`;
+}
+
+/**
+ * Find record by field value (for upsert operations)
+ */
+export async function findRecordByField(
+	this: IExecuteFunctions,
+	resource: string,
+	fieldName: string,
+	fieldValue: string,
+): Promise<IDataObject | null> {
+	const endpoint = getResourceEndpoint(resource);
+
+	try {
+		// Try to search using the API's filter parameter
+		const response = await twentyCrmApiRequest.call(
+			this,
+			'GET',
+			endpoint,
+			{},
+			{
+				filter: JSON.stringify({ [fieldName]: { eq: fieldValue } }),
+				limit: 1,
+			},
+		);
+
+		const data = response.data || response;
+		if (Array.isArray(data) && data.length > 0) {
+			return data[0] as IDataObject;
+		}
+
+		return null;
+	} catch (error) {
+		// If filter doesn't work, try search
+		try {
+			const response = await twentyCrmApiRequest.call(
+				this,
+				'GET',
+				endpoint,
+				{},
+				{
+					search: fieldValue,
+					limit: 10,
+				},
+			);
+
+			const data = response.data || response;
+			if (Array.isArray(data)) {
+				// Find exact match in results
+				const match = data.find((item: IDataObject) => {
+					const itemValue = item[fieldName];
+					if (typeof itemValue === 'string') {
+						return itemValue.toLowerCase() === fieldValue.toLowerCase();
+					}
+					return String(itemValue) === fieldValue;
+				});
+				return match as IDataObject || null;
+			}
+
+			return null;
+		} catch (searchError) {
+			return null;
+		}
+	}
+}
+
+/**
+ * Perform bulk operation (create, update, or delete multiple records)
+ */
+export async function bulkOperation(
+	this: IExecuteFunctions,
+	operation: 'create' | 'update' | 'delete',
+	resource: string,
+	items: IDataObject[],
+): Promise<IDataObject[]> {
+	const endpoint = getResourceEndpoint(resource);
+	const results: IDataObject[] = [];
+
+	// Process items in parallel with concurrency limit
+	const concurrencyLimit = 5;
+	for (let i = 0; i < items.length; i += concurrencyLimit) {
+		const batch = items.slice(i, i + concurrencyLimit);
+		const promises = batch.map(async (item) => {
+			try {
+				let response: IDataObject;
+
+				if (operation === 'create') {
+					response = await twentyCrmApiRequest.call(this, 'POST', endpoint, item);
+				} else if (operation === 'update') {
+					const id = item.id as string;
+					const updateData = { ...item };
+					delete updateData.id;
+					response = await twentyCrmApiRequest.call(this, 'PUT', `${endpoint}/${id}`, updateData);
+				} else {
+					// delete
+					const id = item.id as string;
+					response = await twentyCrmApiRequest.call(this, 'DELETE', `${endpoint}/${id}`);
+				}
+
+				return { success: true, data: response };
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+				return { success: false, error: errorMessage, item };
+			}
+		});
+
+		const batchResults = await Promise.all(promises);
+		results.push(...batchResults);
+	}
+
+	return results;
 }

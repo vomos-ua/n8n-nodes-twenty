@@ -184,4 +184,106 @@ export const opportunityFields: INodeProperties[] = [
 			},
 		],
 	},
+
+	// ----------------------------------
+	//         opportunity:upsert
+	// ----------------------------------
+	{
+		displayName: 'Match Field',
+		name: 'matchField',
+		type: 'options',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['opportunity'],
+				operation: ['upsert'],
+			},
+		},
+		options: [
+			{
+				name: 'Name',
+				value: 'name',
+			},
+		],
+		default: 'name',
+		description: 'Field to match for finding existing opportunity',
+	},
+	{
+		displayName: 'Match Value',
+		name: 'matchValue',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['opportunity'],
+				operation: ['upsert'],
+			},
+		},
+		default: '',
+		description: 'Value to search for in the match field',
+	},
+	{
+		displayName: 'Name',
+		name: 'name',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['opportunity'],
+				operation: ['upsert'],
+			},
+		},
+		default: '',
+		description: 'The name of the opportunity/deal',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['opportunity'],
+				operation: ['upsert'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Amount',
+				name: 'amount',
+				type: 'number',
+				default: 0,
+				description: 'Deal amount in micros (e.g., 1000000 = $1)',
+			},
+			{
+				displayName: 'Close Date',
+				name: 'closeDate',
+				type: 'dateTime',
+				default: '',
+				description: 'Expected close date (ISO 8601)',
+			},
+			{
+				displayName: 'Company ID',
+				name: 'companyId',
+				type: 'string',
+				default: '',
+				description: 'ID of the associated company',
+			},
+			{
+				displayName: 'Point of Contact ID',
+				name: 'pointOfContactId',
+				type: 'string',
+				default: '',
+				description: 'ID of the contact person',
+			},
+			{
+				displayName: 'Stage',
+				name: 'stage',
+				type: 'string',
+				default: '',
+				description: 'Pipeline stage (e.g., NEW, MEETING, WON, LOST)',
+			},
+		],
+	},
 ];

@@ -220,4 +220,143 @@ export const personFields: INodeProperties[] = [
 			},
 		],
 	},
+
+	// ----------------------------------
+	//         person:upsert
+	// ----------------------------------
+	{
+		displayName: 'Match Field',
+		name: 'matchField',
+		type: 'options',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['person'],
+				operation: ['upsert'],
+			},
+		},
+		options: [
+			{
+				name: 'Email',
+				value: 'email',
+			},
+			{
+				name: 'LinkedIn URL',
+				value: 'linkedinUrl',
+			},
+			{
+				name: 'Phone',
+				value: 'phone',
+			},
+		],
+		default: 'email',
+		description: 'Field to match for finding existing person',
+	},
+	{
+		displayName: 'Match Value',
+		name: 'matchValue',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['person'],
+				operation: ['upsert'],
+			},
+		},
+		default: '',
+		description: 'Value to search for in the match field',
+	},
+	{
+		displayName: 'First Name',
+		name: 'firstName',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['person'],
+				operation: ['upsert'],
+			},
+		},
+		default: '',
+		description: 'The first name of the person',
+	},
+	{
+		displayName: 'Last Name',
+		name: 'lastName',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['person'],
+				operation: ['upsert'],
+			},
+		},
+		default: '',
+		description: 'The last name of the person',
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['person'],
+				operation: ['upsert'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Avatar URL',
+				name: 'avatarUrl',
+				type: 'string',
+				default: '',
+				description: 'Avatar image URL',
+			},
+			{
+				displayName: 'City',
+				name: 'city',
+				type: 'string',
+				default: '',
+				description: 'City',
+			},
+			{
+				displayName: 'Company ID',
+				name: 'companyId',
+				type: 'string',
+				default: '',
+				description: 'ID of the company to associate with',
+			},
+			{
+				displayName: 'Email',
+				name: 'email',
+				type: 'string',
+				placeholder: 'name@email.com',
+				default: '',
+				description: 'Email address',
+			},
+			{
+				displayName: 'Job Title',
+				name: 'jobTitle',
+				type: 'string',
+				default: '',
+				description: 'Job title',
+			},
+			{
+				displayName: 'LinkedIn URL',
+				name: 'linkedinUrl',
+				type: 'string',
+				default: '',
+				description: 'LinkedIn profile URL',
+			},
+			{
+				displayName: 'Phone',
+				name: 'phone',
+				type: 'string',
+				default: '',
+				description: 'Phone number',
+			},
+		],
+	},
 ];
