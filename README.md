@@ -165,5 +165,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Support
 
-- For bugs and feature requests, please [open an issue](https://github.com/abm24/n8n-nodes-twenty/issues)
+- For bugs and feature requests, please [open an issue](https://github.com/vomos-ua/n8n-nodes-twenty/issues)
 - For Twenty CRM questions, visit the [Twenty Community](https://twenty.com/community)
