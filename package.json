@@ -1,6 +1,6 @@
 {
 	"name": "@linkedpromo/n8n-nodes-twenty",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "n8n community node for Twenty CRM - Open Source CRM",
 	"keywords": [
 		"n8n-community-node-package",
@@ -10,17 +10,17 @@
 		"twenty-crm"
 	],
 	"license": "MIT",
-	"homepage": "https://github.com/vomos-ua/n8n-nodes-twenty",
+	"homepage": "https://github.com/abm24/n8n-nodes-twenty",
 	"author": {
-		"name": "vomos-ua",
+		"name": "abm24",
 		"email": "info@abm24.cloud"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/vomos-ua/n8n-nodes-twenty.git"
+		"url": "https://github.com/abm24/n8n-nodes-twenty.git"
 	},
 	"bugs": {
-		"url": "https://github.com/vomos-ua/n8n-nodes-twenty/issues"
+		"url": "https://github.com/abm24/n8n-nodes-twenty/issues"
 	},
 	"engines": {
 		"node": ">=18.10"
