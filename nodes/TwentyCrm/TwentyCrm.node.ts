@@ -653,7 +653,7 @@ export class TwentyCrm implements INodeType {
 					}
 
 					if (operation === 'bulkUpdate') {
-						const bulkItemsJson = this.getNodeParameter('bulkItems', i) as string;
+						const bulkItemsJson = this.getNodeParameter('bulkUpdateItems', i) as string;
 						let bulkItems: IDataObject[];
 
 						try {
@@ -680,7 +680,7 @@ export class TwentyCrm implements INodeType {
 					}
 
 					if (operation === 'bulkDelete') {
-						const bulkIds = this.getNodeParameter('bulkIds', i) as string;
+						const bulkIds = this.getNodeParameter('bulkDeleteIds', i) as string;
 						const ids = bulkIds.split(',').map((id) => id.trim()).filter((id) => id);
 
 						if (ids.length === 0) {

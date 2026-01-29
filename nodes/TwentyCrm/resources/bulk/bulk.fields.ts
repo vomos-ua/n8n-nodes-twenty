@@ -2,7 +2,7 @@ import type { INodeProperties } from 'n8n-workflow';
 
 export const bulkFields: INodeProperties[] = [
 	// ----------------------------------
-	//         bulk: Resource Type
+	//         bulk: Resource Type (all operations)
 	// ----------------------------------
 	{
 		displayName: 'Resource Type',
@@ -15,33 +15,19 @@ export const bulkFields: INodeProperties[] = [
 			},
 		},
 		options: [
-			{
-				name: 'Company',
-				value: 'company',
-			},
-			{
-				name: 'Note',
-				value: 'note',
-			},
-			{
-				name: 'Opportunity',
-				value: 'opportunity',
-			},
-			{
-				name: 'Person',
-				value: 'person',
-			},
-			{
-				name: 'Task',
-				value: 'task',
-			},
+			{ name: 'Activity', value: 'activity' },
+			{ name: 'Company', value: 'company' },
+			{ name: 'Note', value: 'note' },
+			{ name: 'Opportunity', value: 'opportunity' },
+			{ name: 'Person', value: 'person' },
+			{ name: 'Task', value: 'task' },
 		],
 		default: 'company',
-		description: 'The type of resource to operate on',
+		description: 'The type of resource to perform bulk operations on',
 	},
 
 	// ----------------------------------
-	//         bulk:bulkCreate - Items
+	//         bulk:bulkCreate
 	// ----------------------------------
 	{
 		displayName: 'Items (JSON)',
@@ -51,19 +37,37 @@ export const bulkFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['bulk'],
-				operation: ['bulkCreate', 'bulkUpdate'],
+				operation: ['bulkCreate'],
 			},
 		},
-		default: '[\n  {\n    "name": "Company 1"\n  },\n  {\n    "name": "Company 2"\n  }\n]',
-		description: 'JSON array of items to create or update. For update, each item must include "id" field.',
+		default: '[\n  {"name": "Record 1"},\n  {"name": "Record 2"}\n]',
+		description: 'JSON array of items to create. Each item should have the required fields for the selected resource type.',
 	},
 
 	// ----------------------------------
-	//         bulk:bulkDelete - IDs
+	//         bulk:bulkUpdate
+	// ----------------------------------
+	{
+		displayName: 'Items (JSON)',
+		name: 'bulkUpdateItems',
+		type: 'json',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['bulk'],
+				operation: ['bulkUpdate'],
+			},
+		},
+		default: '[\n  {"id": "record-id-1", "name": "Updated Name 1"},\n  {"id": "record-id-2", "name": "Updated Name 2"}\n]',
+		description: 'JSON array of items to update. Each item must include "id" field and the fields to update.',
+	},
+
+	// ----------------------------------
+	//         bulk:bulkDelete
 	// ----------------------------------
 	{
 		displayName: 'Record IDs',
-		name: 'bulkIds',
+		name: 'bulkDeleteIds',
 		type: 'string',
 		required: true,
 		displayOptions: {
@@ -74,37 +78,5 @@ export const bulkFields: INodeProperties[] = [
 		},
 		default: '',
 		description: 'Comma-separated list of record IDs to delete',
-	},
-
-	// ----------------------------------
-	//         bulk: Options
-	// ----------------------------------
-	{
-		displayName: 'Options',
-		name: 'bulkOptions',
-		type: 'collection',
-		placeholder: 'Add Option',
-		default: {},
-		displayOptions: {
-			show: {
-				resource: ['bulk'],
-			},
-		},
-		options: [
-			{
-				displayName: 'Continue On Error',
-				name: 'continueOnError',
-				type: 'boolean',
-				default: true,
-				description: 'Whether to continue processing remaining items if one fails',
-			},
-			{
-				displayName: 'Return Failed Items',
-				name: 'returnFailedItems',
-				type: 'boolean',
-				default: true,
-				description: 'Whether to include failed items in the output',
-			},
-		],
 	},
 ];

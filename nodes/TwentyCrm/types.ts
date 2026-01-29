@@ -80,6 +80,23 @@ export interface ITask {
 	updatedAt?: string;
 }
 
+// Activity types
+export type ActivityType = 'Call' | 'Email' | 'Meeting' | 'Note' | 'Task';
+
+export interface IActivity {
+	id?: string;
+	title: string;
+	type: ActivityType;
+	body?: string;
+	dueAt?: string;
+	completedAt?: string;
+	reminderAt?: string;
+	companyId?: string;
+	personId?: string;
+	createdAt?: string;
+	updatedAt?: string;
+}
+
 // Search types
 export type SearchObjectType = 'people' | 'companies' | 'opportunities' | 'notes' | 'tasks';
 
@@ -95,6 +112,6 @@ export interface ITwentyCrmCredentials {
 }
 
 // Resource types for node
-export type TwentyResource = 'company' | 'person' | 'opportunity' | 'note' | 'task' | 'search';
+export type TwentyResource = 'company' | 'person' | 'opportunity' | 'note' | 'task' | 'activity' | 'bulk' | 'search';
 
-export type TwentyOperation = 'create' | 'delete' | 'get' | 'getAll' | 'update' | 'search';
+export type TwentyOperation = 'create' | 'delete' | 'get' | 'getAll' | 'update' | 'upsert' | 'bulkCreate' | 'bulkUpdate' | 'bulkDelete' | 'search';

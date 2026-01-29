@@ -30,26 +30,11 @@ export const activityFields: INodeProperties[] = [
 			},
 		},
 		options: [
-			{
-				name: 'Call',
-				value: 'Call',
-			},
-			{
-				name: 'Email',
-				value: 'Email',
-			},
-			{
-				name: 'Meeting',
-				value: 'Meeting',
-			},
-			{
-				name: 'Note',
-				value: 'Note',
-			},
-			{
-				name: 'Task',
-				value: 'Task',
-			},
+			{ name: 'Call', value: 'Call' },
+			{ name: 'Email', value: 'Email' },
+			{ name: 'Meeting', value: 'Meeting' },
+			{ name: 'Note', value: 'Note' },
+			{ name: 'Task', value: 'Task' },
 		],
 		default: 'Call',
 		description: 'The type of activity',
@@ -125,47 +110,32 @@ export const activityFields: INodeProperties[] = [
 		},
 		options: [
 			{
+				displayName: 'Type',
+				name: 'type',
+				type: 'options',
+				options: [
+					{ name: 'Call', value: 'Call' },
+					{ name: 'Email', value: 'Email' },
+					{ name: 'Meeting', value: 'Meeting' },
+					{ name: 'Note', value: 'Note' },
+					{ name: 'Task', value: 'Task' },
+				],
+				default: '',
+				description: 'Filter by activity type',
+			},
+			{
 				displayName: 'Company ID',
 				name: 'companyId',
 				type: 'string',
 				default: '',
-				description: 'Filter by associated company',
+				description: 'Filter by company ID',
 			},
 			{
 				displayName: 'Person ID',
 				name: 'personId',
 				type: 'string',
 				default: '',
-				description: 'Filter by associated person',
-			},
-			{
-				displayName: 'Type',
-				name: 'type',
-				type: 'options',
-				options: [
-					{
-						name: 'Call',
-						value: 'Call',
-					},
-					{
-						name: 'Email',
-						value: 'Email',
-					},
-					{
-						name: 'Meeting',
-						value: 'Meeting',
-					},
-					{
-						name: 'Note',
-						value: 'Note',
-					},
-					{
-						name: 'Task',
-						value: 'Task',
-					},
-				],
-				default: 'Call',
-				description: 'Filter by activity type',
+				description: 'Filter by person ID',
 			},
 		],
 	},
@@ -201,41 +171,41 @@ export const activityFields: INodeProperties[] = [
 				name: 'companyId',
 				type: 'string',
 				default: '',
-				description: 'ID of the associated company',
+				description: 'ID of the related company',
 			},
 			{
 				displayName: 'Completed At',
 				name: 'completedAt',
 				type: 'dateTime',
 				default: '',
-				description: 'When the activity was completed (ISO 8601)',
+				description: 'When the activity was completed (ISO 8601 format)',
 			},
 			{
-				displayName: 'Due At',
+				displayName: 'Due Date',
 				name: 'dueAt',
 				type: 'dateTime',
 				default: '',
-				description: 'When the activity is due (ISO 8601)',
+				description: 'Due date (ISO 8601 format)',
 			},
 			{
 				displayName: 'Person ID',
 				name: 'personId',
 				type: 'string',
 				default: '',
-				description: 'ID of the associated person',
+				description: 'ID of the related person',
 			},
 			{
-				displayName: 'Reminder At',
+				displayName: 'Reminder Date',
 				name: 'reminderAt',
 				type: 'dateTime',
 				default: '',
-				description: 'When to send a reminder (ISO 8601)',
+				description: 'Reminder date (ISO 8601 format)',
 			},
 		],
 	},
 
 	// ----------------------------------
-	//         activity:update - Update Fields
+	//         activity:update - Main Fields
 	// ----------------------------------
 	{
 		displayName: 'Update Fields',
@@ -262,26 +232,11 @@ export const activityFields: INodeProperties[] = [
 				name: 'type',
 				type: 'options',
 				options: [
-					{
-						name: 'Call',
-						value: 'Call',
-					},
-					{
-						name: 'Email',
-						value: 'Email',
-					},
-					{
-						name: 'Meeting',
-						value: 'Meeting',
-					},
-					{
-						name: 'Note',
-						value: 'Note',
-					},
-					{
-						name: 'Task',
-						value: 'Task',
-					},
+					{ name: 'Call', value: 'Call' },
+					{ name: 'Email', value: 'Email' },
+					{ name: 'Meeting', value: 'Meeting' },
+					{ name: 'Note', value: 'Note' },
+					{ name: 'Task', value: 'Task' },
 				],
 				default: 'Call',
 				description: 'The type of activity',

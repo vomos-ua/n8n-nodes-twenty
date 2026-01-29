@@ -1,10 +1,10 @@
 import type {
-	IDataObject,
 	IHookFunctions,
+	IWebhookFunctions,
 	INodeType,
 	INodeTypeDescription,
-	IWebhookFunctions,
 	IWebhookResponseData,
+	IDataObject,
 } from 'n8n-workflow';
 
 import { twentyCrmApiRequest } from './GenericFunctions';
@@ -17,7 +17,7 @@ export class TwentyCrmTrigger implements INodeType {
 		group: ['trigger'],
 		version: 1,
 		subtitle: '={{$parameter["event"]}}',
-		description: 'Starts the workflow when Twenty CRM events occur',
+		description: 'Starts the workflow when a Twenty CRM event occurs',
 		defaults: {
 			name: 'Twenty CRM Trigger',
 		},
@@ -42,6 +42,7 @@ export class TwentyCrmTrigger implements INodeType {
 				displayName: 'Event',
 				name: 'event',
 				type: 'options',
+				noDataExpression: true,
 				required: true,
 				default: 'company.created',
 				options: [
@@ -49,96 +50,97 @@ export class TwentyCrmTrigger implements INodeType {
 					{
 						name: 'Company Created',
 						value: 'company.created',
+						description: 'Triggered when a company is created',
 					},
 					{
 						name: 'Company Updated',
 						value: 'company.updated',
+						description: 'Triggered when a company is updated',
 					},
 					{
 						name: 'Company Deleted',
 						value: 'company.deleted',
+						description: 'Triggered when a company is deleted',
 					},
 					// Person events
 					{
 						name: 'Person Created',
 						value: 'person.created',
+						description: 'Triggered when a person is created',
 					},
 					{
 						name: 'Person Updated',
 						value: 'person.updated',
+						description: 'Triggered when a person is updated',
 					},
 					{
 						name: 'Person Deleted',
 						value: 'person.deleted',
+						description: 'Triggered when a person is deleted',
 					},
 					// Opportunity events
 					{
 						name: 'Opportunity Created',
 						value: 'opportunity.created',
+						description: 'Triggered when an opportunity is created',
 					},
 					{
 						name: 'Opportunity Updated',
 						value: 'opportunity.updated',
+						description: 'Triggered when an opportunity is updated',
 					},
 					{
 						name: 'Opportunity Deleted',
 						value: 'opportunity.deleted',
+						description: 'Triggered when an opportunity is deleted',
 					},
 					// Task events
 					{
 						name: 'Task Created',
 						value: 'task.created',
+						description: 'Triggered when a task is created',
 					},
 					{
 						name: 'Task Updated',
 						value: 'task.updated',
+						description: 'Triggered when a task is updated',
 					},
 					{
 						name: 'Task Deleted',
 						value: 'task.deleted',
+						description: 'Triggered when a task is deleted',
 					},
 					// Note events
 					{
 						name: 'Note Created',
 						value: 'note.created',
+						description: 'Triggered when a note is created',
 					},
 					{
 						name: 'Note Updated',
 						value: 'note.updated',
+						description: 'Triggered when a note is updated',
 					},
 					{
 						name: 'Note Deleted',
 						value: 'note.deleted',
+						description: 'Triggered when a note is deleted',
 					},
 					// Activity events
 					{
 						name: 'Activity Created',
 						value: 'activity.created',
+						description: 'Triggered when an activity is created',
 					},
 					{
 						name: 'Activity Updated',
 						value: 'activity.updated',
+						description: 'Triggered when an activity is updated',
 					},
 					{
 						name: 'Activity Deleted',
 						value: 'activity.deleted',
-					},
-				],
-				description: 'The event that triggers the workflow',
-			},
-			{
-				displayName: 'Options',
-				name: 'options',
-				type: 'collection',
-				placeholder: 'Add Option',
-				default: {},
-				options: [
-					{
-						displayName: 'Include Previous Data',
-						name: 'includePreviousData',
-						type: 'boolean',
-						default: false,
-						description: 'Whether to include the previous state of the record (for updates)',
+						description: 'Triggered when an activity is deleted',
 					},
 				],
 			},
@@ -148,72 +150,73 @@ export class TwentyCrmTrigger implements INodeType {
 	webhookMethods = {
 		default: {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
-				const webhookData = this.getWorkflowStaticData('node');
 				const webhookUrl = this.getNodeWebhookUrl('default');
 				const event = this.getNodeParameter('event') as string;
+				const webhookData = this.getWorkflowStaticData('node');
 
-				// Try to get existing webhooks
+				// Check if webhook already exists
+				if (webhookData.webhookId) {
+					try {
+						await twentyCrmApiRequest.call(
+							this,
+							'GET',
+							`/webhooks/${webhookData.webhookId}`,
+						);
+						return true;
+					} catch (error) {
+						// Webhook doesn't exist anymore
+						delete webhookData.webhookId;
+						return false;
+					}
+				}
+
+				// Try to find existing webhook with same URL and event
 				try {
 					const response = await twentyCrmApiRequest.call(
 						this,
 						'GET',
-						'/rest/webhooks',
-						{},
-						{ limit: 60 },
-					);
-
-					const webhooks = response.data || response;
-
-					if (Array.isArray(webhooks)) {
-						for (const webhook of webhooks) {
-							if (
-								webhook.targetUrl === webhookUrl &&
-								webhook.operation === event
-							) {
-								webhookData.webhookId = webhook.id;
-								return true;
-							}
+						'/webhooks',
+					) as IDataObject;
+					
+					const webhooks = (response.data || response) as IDataObject[];
+					
+					for (const webhook of webhooks) {
+						if (webhook.targetUrl === webhookUrl && webhook.operation === event) {
+							webhookData.webhookId = webhook.id;
+							return true;
 						}
 					}
 				} catch (error) {
-					// Webhooks endpoint might not exist in some Twenty CRM versions
-					return false;
+					// If we can't list webhooks, assume it doesn't exist
 				}
 
 				return false;
 			},
-
 			async create(this: IHookFunctions): Promise<boolean> {
 				const webhookUrl = this.getNodeWebhookUrl('default');
 				const event = this.getNodeParameter('event') as string;
 				const webhookData = this.getWorkflowStaticData('node');
 
-				try {
-					const body = {
-						targetUrl: webhookUrl,
-						operation: event,
-					};
+				const body: IDataObject = {
+					targetUrl: webhookUrl,
+					operation: event,
+				};
 
+				try {
 					const response = await twentyCrmApiRequest.call(
 						this,
 						'POST',
-						'/rest/webhooks',
+						'/webhooks',
 						body,
-					);
+					) as IDataObject;
 
-					if (response.id) {
-						webhookData.webhookId = response.id;
-						return true;
-					}
+					const data = (response.data || response) as IDataObject;
+					webhookData.webhookId = data.id;
+					return true;
 				} catch (error) {
-					// If webhook creation fails, we'll use polling fallback
-					console.error('Failed to create webhook:', error);
 					return false;
 				}
-
-				return false;
 			},
-
 			async delete(this: IHookFunctions): Promise<boolean> {
 				const webhookData = this.getWorkflowStaticData('node');
 
@@ -222,32 +225,25 @@ export class TwentyCrmTrigger implements INodeType {
 						await twentyCrmApiRequest.call(
 							this,
 							'DELETE',
-							`/rest/webhooks/${webhookData.webhookId}`,
+							`/webhooks/${webhookData.webhookId}`,
 						);
 					} catch (error) {
-						// Ignore errors during cleanup
+						return false;
 					}
+					delete webhookData.webhookId;
 				}
-
-				delete webhookData.webhookId;
 				return true;
 			},
 		},
 	};
 
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
-		const bodyData = this.getBodyData() as IDataObject;
-		const headerData = this.getHeaderData() as IDataObject;
-
-		// Add metadata to the response
-		const returnData: IDataObject = {
-			...bodyData,
-			_webhookTimestamp: new Date().toISOString(),
-			_webhookHeaders: headerData,
-		};
-
+		const bodyData = this.getBodyData();
+		
 		return {
-			workflowData: [this.helpers.returnJsonArray([returnData])],
+			workflowData: [
+				this.helpers.returnJsonArray(bodyData as IDataObject),
+			],
 		};
 	}
 }
