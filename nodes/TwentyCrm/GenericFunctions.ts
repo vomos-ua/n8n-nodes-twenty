@@ -10,6 +10,15 @@ import type {
 import { NodeApiError } from 'n8n-workflow';
 
 import type { ITwentyCrmCredentials } from './types';
+import {
+	DEFAULT_RETRY_CONFIG,
+	isRetryableError,
+	calculateDelay,
+	sleep,
+	extractRateLimitInfo,
+	getErrorContext,
+	type IRetryConfig,
+} from './utils/retry';
 
 /**
  * Make an authenticated request to Twenty CRM API
@@ -60,6 +69,52 @@ export async function twentyCrmApiRequest(
 }
 
 /**
+ * Make an authenticated request to Twenty CRM API with automatic retry on transient errors
+ */
+export async function twentyCrmApiRequestWithRetry(
+	this: IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions,
+	method: IHttpRequestMethods,
+	endpoint: string,
+	body: IDataObject = {},
+	qs: IDataObject = {},
+	retryConfig: Partial<IRetryConfig> = {},
+): Promise<any> {
+	const config: IRetryConfig = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
+	let lastError: Error | undefined;
+
+	for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
+		try {
+			return await twentyCrmApiRequest.call(this, method, endpoint, body, qs);
+		} catch (error) {
+			lastError = error as Error;
+
+			// Check if we should retry
+			const shouldRetry = isRetryableError(error) && attempt < config.maxRetries;
+
+			if (!shouldRetry) {
+				// Enhance error message with context
+				const context = getErrorContext(error, attempt, config.maxRetries);
+				const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+				throw new NodeApiError(this.getNode(), error as JsonObject, {
+					message: `Twenty CRM API error: ${context}${errorMessage}`,
+				});
+			}
+
+			// Calculate delay (respect rate limit headers if present)
+			const rateLimitInfo = extractRateLimitInfo(error);
+			const delay = rateLimitInfo.retryAfter || calculateDelay(attempt, config);
+
+			// Wait before retrying
+			await sleep(delay);
+		}
+	}
+
+	// Should never reach here, but just in case
+	throw lastError;
+}
+
+/**
  * Make an authenticated request and return all items (handles pagination)
  */
 export async function twentyCrmApiRequestAllItems(
@@ -76,7 +131,7 @@ export async function twentyCrmApiRequestAllItems(
 	qs.offset = 0;
 
 	do {
-		responseData = await twentyCrmApiRequest.call(this, method, endpoint, body, qs);
+		responseData = await twentyCrmApiRequestWithRetry.call(this, method, endpoint, body, qs);
 
 		// Handle different response formats
 		const data = responseData.data || responseData;
@@ -112,7 +167,7 @@ export async function twentyCrmSearchRecords(
 	// Search each object type in parallel
 	const searchPromises = objectTypes.map(async (objectType) => {
 		try {
-			const response = await twentyCrmApiRequest.call(
+			const response = await twentyCrmApiRequestWithRetry.call(
 				this,
 				'GET',
 				`/rest/${objectType}`,
@@ -332,7 +387,7 @@ export async function findRecordByField(
 
 	try {
 		// Try to search using the API's filter parameter
-		const response = await twentyCrmApiRequest.call(
+		const response = await twentyCrmApiRequestWithRetry.call(
 			this,
 			'GET',
 			endpoint,
@@ -352,7 +407,7 @@ export async function findRecordByField(
 	} catch (error) {
 		// If filter doesn't work, try search
 		try {
-			const response = await twentyCrmApiRequest.call(
+			const response = await twentyCrmApiRequestWithRetry.call(
 				this,
 				'GET',
 				endpoint,
@@ -404,16 +459,16 @@ export async function bulkOperation(
 				let response: IDataObject;
 
 				if (operation === 'create') {
-					response = await twentyCrmApiRequest.call(this, 'POST', endpoint, item);
+					response = await twentyCrmApiRequestWithRetry.call(this, 'POST', endpoint, item);
 				} else if (operation === 'update') {
 					const id = item.id as string;
 					const updateData = { ...item };
 					delete updateData.id;
-					response = await twentyCrmApiRequest.call(this, 'PUT', `${endpoint}/${id}`, updateData);
+					response = await twentyCrmApiRequestWithRetry.call(this, 'PUT', `${endpoint}/${id}`, updateData);
 				} else {
 					// delete
 					const id = item.id as string;
-					response = await twentyCrmApiRequest.call(this, 'DELETE', `${endpoint}/${id}`);
+					response = await twentyCrmApiRequestWithRetry.call(this, 'DELETE', `${endpoint}/${id}`);
 				}
 
 				return { success: true, data: response };

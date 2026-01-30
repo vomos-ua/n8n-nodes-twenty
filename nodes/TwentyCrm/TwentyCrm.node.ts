@@ -1,7 +1,9 @@
 import type {
 	IDataObject,
 	IExecuteFunctions,
+	ILoadOptionsFunctions,
 	INodeExecutionData,
+	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
 } from 'n8n-workflow';
@@ -30,6 +32,7 @@ import { noteOperations, noteFields } from './resources/note';
 import { taskOperations, taskFields } from './resources/task';
 import { searchOperations, searchFields } from './resources/search';
 import { bulkOperations, bulkFields } from './resources/bulk';
+import { customObjectOperations, customObjectFields } from './resources/customObject';
 
 export class TwentyCrm implements INodeType {
 	description: INodeTypeDescription = {
@@ -72,6 +75,10 @@ export class TwentyCrm implements INodeType {
 						value: 'company',
 					},
 					{
+						name: 'Custom Object',
+						value: 'customObject',
+					},
+					{
 						name: 'Note',
 						value: 'note',
 					},
@@ -112,7 +119,71 @@ export class TwentyCrm implements INodeType {
 			...taskFields,
 			...searchOperations,
 			...searchFields,
+			...customObjectOperations,
+			...customObjectFields,
 		],
+	};
+
+	methods = {
+		loadOptions: {
+			/**
+			 * Load companies for dropdown selection
+			 */
+			async getCompanies(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const response = await twentyCrmApiRequest.call(this, 'GET', '/rest/companies', {}, { limit: 60 });
+				const companies = response.data || response;
+
+				if (!Array.isArray(companies)) {
+					return [];
+				}
+
+				return companies.map((company: IDataObject) => ({
+					name: (company.name as string) || (company.id as string),
+					value: company.id as string,
+				}));
+			},
+
+			/**
+			 * Load people for dropdown selection
+			 */
+			async getPeople(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const response = await twentyCrmApiRequest.call(this, 'GET', '/rest/people', {}, { limit: 60 });
+				const people = response.data || response;
+
+				if (!Array.isArray(people)) {
+					return [];
+				}
+
+				return people.map((person: IDataObject) => {
+					const name = person.name as IDataObject | undefined;
+					const firstName = name?.firstName as string || '';
+					const lastName = name?.lastName as string || '';
+					const displayName = `${firstName} ${lastName}`.trim() || (person.id as string);
+
+					return {
+						name: displayName,
+						value: person.id as string,
+					};
+				});
+			},
+
+			/**
+			 * Load opportunities for dropdown selection
+			 */
+			async getOpportunities(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const response = await twentyCrmApiRequest.call(this, 'GET', '/rest/opportunities', {}, { limit: 60 });
+				const opportunities = response.data || response;
+
+				if (!Array.isArray(opportunities)) {
+					return [];
+				}
+
+				return opportunities.map((opportunity: IDataObject) => ({
+					name: (opportunity.name as string) || (opportunity.id as string),
+					value: opportunity.id as string,
+				}));
+			},
+		},
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
@@ -696,6 +767,100 @@ export class TwentyCrm implements INodeType {
 
 						const bulkItems = ids.map((id) => ({ id }));
 						responseData = await bulkOperation.call(this, 'delete', bulkResourceType, bulkItems);
+					}
+				}
+
+				// ----------------------------------------
+				//             customObject
+				// ----------------------------------------
+				if (resource === 'customObject') {
+					const objectApiName = this.getNodeParameter('customObjectApiName', i) as string;
+					const endpoint = `/rest/${objectApiName}`;
+					const options = this.getNodeParameter('customOptions', i, {}) as IDataObject;
+					const qs: IDataObject = {};
+
+					if (options.depth !== undefined) {
+						qs.depth = options.depth;
+					}
+
+					if (operation === 'create') {
+						const fieldsJson = this.getNodeParameter('customFields', i) as string;
+						let body: IDataObject;
+
+						try {
+							body = JSON.parse(fieldsJson);
+						} catch (parseError) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'Invalid JSON format for fields',
+								{ itemIndex: i },
+							);
+						}
+
+						responseData = await twentyCrmApiRequest.call(this, 'POST', endpoint, body, qs);
+					}
+
+					if (operation === 'delete') {
+						const recordId = this.getNodeParameter('customRecordId', i) as string;
+						responseData = await twentyCrmApiRequest.call(this, 'DELETE', `${endpoint}/${recordId}`, {}, qs);
+					}
+
+					if (operation === 'get') {
+						const recordId = this.getNodeParameter('customRecordId', i) as string;
+						responseData = await twentyCrmApiRequest.call(this, 'GET', `${endpoint}/${recordId}`, {}, qs);
+					}
+
+					if (operation === 'getAll') {
+						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const filtersJson = this.getNodeParameter('customFilters', i, '') as string;
+
+						if (filtersJson) {
+							try {
+								const filters = JSON.parse(filtersJson);
+								qs.filter = JSON.stringify(filters);
+							} catch (parseError) {
+								throw new NodeOperationError(
+									this.getNode(),
+									'Invalid JSON format for filters',
+									{ itemIndex: i },
+								);
+							}
+						}
+
+						if (returnAll) {
+							responseData = await twentyCrmApiRequestAllItems.call(this, 'GET', endpoint, {}, qs);
+						} else {
+							const limit = this.getNodeParameter('limit', i) as number;
+							qs.limit = limit;
+							const response = await twentyCrmApiRequest.call(this, 'GET', endpoint, {}, qs);
+							responseData = response.data || response;
+						}
+					}
+
+					if (operation === 'update') {
+						const recordId = this.getNodeParameter('customRecordId', i) as string;
+						const updateFieldsJson = this.getNodeParameter('customUpdateFields', i) as string;
+						let body: IDataObject;
+
+						try {
+							body = JSON.parse(updateFieldsJson);
+						} catch (parseError) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'Invalid JSON format for update fields',
+								{ itemIndex: i },
+							);
+						}
+
+						if (Object.keys(body).length === 0) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'At least one field must be updated',
+								{ itemIndex: i },
+							);
+						}
+
+						responseData = await twentyCrmApiRequest.call(this, 'PUT', `${endpoint}/${recordId}`, body, qs);
 					}
 				}
 

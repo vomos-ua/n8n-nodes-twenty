@@ -150,11 +150,14 @@ export const personFields: INodeProperties[] = [
 				description: 'City',
 			},
 			{
-				displayName: 'Company ID',
+				displayName: 'Company',
 				name: 'companyId',
-				type: 'string',
+				type: 'options',
+				typeOptions: {
+					loadOptionsMethod: 'getCompanies',
+				},
 				default: '',
-				description: 'ID of the company to associate with',
+				description: 'Company to associate with',
 			},
 			{
 				displayName: 'Email',
@@ -322,11 +325,14 @@ export const personFields: INodeProperties[] = [
 				description: 'City',
 			},
 			{
-				displayName: 'Company ID',
+				displayName: 'Company',
 				name: 'companyId',
-				type: 'string',
+				type: 'options',
+				typeOptions: {
+					loadOptionsMethod: 'getCompanies',
+				},
 				default: '',
-				description: 'ID of the company to associate with',
+				description: 'Company to associate with',
 			},
 			{
 				displayName: 'Email',

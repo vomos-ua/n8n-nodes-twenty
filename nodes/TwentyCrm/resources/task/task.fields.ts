@@ -127,11 +127,14 @@ export const taskFields: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Assignee ID',
+				displayName: 'Assignee',
 				name: 'assigneeId',
-				type: 'string',
+				type: 'options',
+				typeOptions: {
+					loadOptionsMethod: 'getPeople',
+				},
 				default: '',
-				description: 'ID of the person to assign the task to',
+				description: 'Person to assign the task to',
 			},
 			{
 				displayName: 'Body',
