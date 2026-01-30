@@ -22,3 +22,6 @@ coverage/
 # Temp files
 *.tmp
 *.temp
+
+# MCP configuration (contains secrets)
+.mcp.json

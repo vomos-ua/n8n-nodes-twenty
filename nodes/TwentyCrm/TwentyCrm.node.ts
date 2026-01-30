@@ -16,6 +16,9 @@ import {
 	buildFilterQuery,
 	findRecordByField,
 	bulkOperation,
+	transformCompanyFields,
+	transformPersonFields,
+	transformNoteFields,
 } from './GenericFunctions';
 
 // Import resource definitions
@@ -200,10 +203,10 @@ export class TwentyCrm implements INodeType {
 						const name = this.getNodeParameter('name', i) as string;
 						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
 
-						const body = cleanObject({
+						const body = transformCompanyFields(cleanObject({
 							name,
 							...additionalFields,
-						});
+						}));
 
 						responseData = await twentyCrmApiRequest.call(this, 'POST', endpoint, body);
 					}
@@ -238,10 +241,10 @@ export class TwentyCrm implements INodeType {
 						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
 						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
 
-						const body = cleanObject({
+						const body = transformCompanyFields(cleanObject({
 							...additionalFields,
 							...updateFields,
-						});
+						}));
 
 						if (Object.keys(body).length === 0) {
 							throw new NodeOperationError(
@@ -263,11 +266,11 @@ export class TwentyCrm implements INodeType {
 						// Try to find existing record
 						const existingRecord = await findRecordByField.call(this, 'company', matchField, matchValue);
 
-						const body = cleanObject({
+						const body = transformCompanyFields(cleanObject({
 							name,
 							[matchField]: matchValue,
 							...additionalFields,
-						});
+						}));
 
 						if (existingRecord && existingRecord.id) {
 							// Update existing record
@@ -297,11 +300,11 @@ export class TwentyCrm implements INodeType {
 						const lastName = this.getNodeParameter('lastName', i) as string;
 						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
 
-						const body = cleanObject({
+						const body = transformPersonFields(cleanObject({
 							firstName,
 							lastName,
 							...additionalFields,
-						});
+						}));
 
 						responseData = await twentyCrmApiRequest.call(this, 'POST', endpoint, body);
 					}
@@ -336,10 +339,10 @@ export class TwentyCrm implements INodeType {
 						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
 						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
 
-						const body = cleanObject({
+						const body = transformPersonFields(cleanObject({
 							...additionalFields,
 							...updateFields,
-						});
+						}));
 
 						if (Object.keys(body).length === 0) {
 							throw new NodeOperationError(
@@ -362,12 +365,12 @@ export class TwentyCrm implements INodeType {
 						// Try to find existing record
 						const existingRecord = await findRecordByField.call(this, 'person', matchField, matchValue);
 
-						const body = cleanObject({
+						const body = transformPersonFields(cleanObject({
 							firstName,
 							lastName,
 							[matchField]: matchValue,
 							...additionalFields,
-						});
+						}));
 
 						if (existingRecord && existingRecord.id) {
 							// Update existing record
@@ -489,14 +492,14 @@ export class TwentyCrm implements INodeType {
 
 					if (operation === 'create') {
 						const title = this.getNodeParameter('title', i) as string;
-						const body = this.getNodeParameter('body', i) as string;
+						// Note: Twenty CRM notes don't have a 'body' field in the API
+						// The 'body' parameter is kept in UI for backwards compatibility but not sent to API
 						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
 
-						const requestBody = cleanObject({
+						const requestBody = transformNoteFields(cleanObject({
 							title,
-							body,
 							...additionalFields,
-						});
+						}));
 
 						responseData = await twentyCrmApiRequest.call(this, 'POST', endpoint, requestBody);
 					}
@@ -531,10 +534,10 @@ export class TwentyCrm implements INodeType {
 						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
 						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
 
-						const body = cleanObject({
+						const body = transformNoteFields(cleanObject({
 							...additionalFields,
 							...updateFields,
-						});
+						}));
 
 						if (Object.keys(body).length === 0) {
 							throw new NodeOperationError(

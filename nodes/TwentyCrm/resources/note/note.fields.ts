@@ -19,13 +19,13 @@ export const noteFields: INodeProperties[] = [
 		description: 'The title of the note',
 	},
 	{
-		displayName: 'Body',
+		displayName: 'Body (Deprecated)',
 		name: 'body',
 		type: 'string',
 		typeOptions: {
 			rows: 4,
 		},
-		required: true,
+		required: false,
 		displayOptions: {
 			show: {
 				resource: ['note'],
@@ -33,7 +33,7 @@ export const noteFields: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'The content of the note',
+		description: 'Note: This field is not supported by Twenty CRM API and will be ignored',
 	},
 
 	// ----------------------------------
