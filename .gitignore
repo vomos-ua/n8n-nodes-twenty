@@ -25,3 +25,6 @@ coverage/
 
 # MCP configuration (contains secrets)
 .mcp.json
+
+# Claude Code
+.claude/

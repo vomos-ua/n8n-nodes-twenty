@@ -5,7 +5,7 @@
 This is an n8n community node package for **Twenty CRM** - an Open Source CRM platform.
 
 - **Package**: `@linkedpromo/n8n-nodes-twenty`
-- **Version**: 0.3.1
+- **Version**: 0.3.2
 - **npm**: https://www.npmjs.com/package/@linkedpromo/n8n-nodes-twenty
 - **GitHub**: https://github.com/abm24/n8n-nodes-twenty
 - **Compatibility**: n8n 2.4.6+, Node.js 18.10+
@@ -108,6 +108,39 @@ The `.mcp.json` file contains MCP servers for testing and development:
 | `mcp-abm24-n8n` | n8n automation | Execute n8n workflows |
 | `mcp-supabase` | Supabase database | Backend testing |
 | `mcp-qdrant` | Vector database | Search functionality |
+
+## Credentials Configuration (ВАЖЛИВО!)
+
+### Налаштування в n8n
+
+1. Перейди в **Credentials** → **Add Credential** → **Twenty CRM API**
+2. Заповни поля:
+
+| Поле | Значення | Приклад |
+|------|----------|---------|
+| **API URL** | URL Twenty CRM інстансу (БЕЗ `/rest`) | `https://global.crm.linked.promo` |
+| **API Key** | API ключ (JWT token) | `eyJhbGciOiJIUzI1NiIs...` |
+
+### Відомі проблеми
+
+#### Нода висить / timeout
+**Симптом**: Нода довго виконується і не повертає результат
+
+**Причина**: Неправильний API URL в credentials
+
+**Рішення**:
+1. Перевір що API URL вказує на правильний Twenty CRM інстанс
+2. URL має бути БЕЗ trailing slash (`/`) в кінці
+3. URL має бути БЕЗ `/rest` - нода додає це автоматично
+4. Переконайся що Twenty CRM сервер доступний
+
+**Приклад правильного URL**: `https://global.crm.linked.promo`
+**Приклад неправильного URL**: `https://crm.abm24.cloud/` (trailing slash, неправильний домен)
+
+#### Після зміни credentials нода все ще не працює
+**Рішення**: Видали ноду і додай нову з правильними credentials
+
+---
 
 ## Twenty CRM API Reference
 
@@ -228,7 +261,8 @@ Twenty CRM використовує **складні об'єкти** для ба
 
 - **Test Workflow**: https://n8n.abm24.cloud/workflow/0Xb21aub9GZWBOLWG-eJ5
 - **n8n Instance**: https://n8n.abm24.cloud
-- **Twenty CRM**: https://crm.abm24.cloud (доступ через mcp-twenty)
+- **Twenty CRM**: https://global.crm.linked.promo (доступ через mcp-twenty)
+- **Credentials Name**: "Twenty CRM Global LP"
 
 ### MCP Tools for Testing
 
