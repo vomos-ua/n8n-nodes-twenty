@@ -5,9 +5,9 @@
 This is an n8n community node package for **Twenty CRM** - an Open Source CRM platform.
 
 - **Package**: `@linkedpromo/n8n-nodes-twenty`
-- **Version**: 0.3.2
+- **Version**: 0.3.4
 - **npm**: https://www.npmjs.com/package/@linkedpromo/n8n-nodes-twenty
-- **GitHub**: https://github.com/abm24/n8n-nodes-twenty
+- **GitHub**: https://github.com/vomos-ua/n8n-nodes-twenty
 - **Compatibility**: n8n 2.4.6+, Node.js 18.10+
 
 ## Project Structure
@@ -406,4 +406,4 @@ npm run build
 
 - **Author**: abm24
 - **Email**: info@abm24.cloud
-- **Issues**: https://github.com/abm24/n8n-nodes-twenty/issues
+- **Issues**: https://github.com/vomos-ua/n8n-nodes-twenty/issues

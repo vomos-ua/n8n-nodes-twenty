@@ -209,9 +209,9 @@ The node automatically transforms simple values to Twenty's complex format:
 | | |
 |:--|:--|
 | 📦 npm | [npmjs.com/package/@linkedpromo/n8n-nodes-twenty](https://www.npmjs.com/package/@linkedpromo/n8n-nodes-twenty) |
-| 💻 GitHub | [github.com/abm24/n8n-nodes-twenty](https://github.com/abm24/n8n-nodes-twenty) |
+| 💻 GitHub | [github.com/vomos-ua/n8n-nodes-twenty](https://github.com/vomos-ua/n8n-nodes-twenty) |
 | 🏠 Twenty CRM | [twenty.com](https://twenty.com) |
-| 🐛 Issues | [Report a bug](https://github.com/abm24/n8n-nodes-twenty/issues) |
+| 🐛 Issues | [Report a bug](https://github.com/vomos-ua/n8n-nodes-twenty/issues) |
 
 ---
 
