@@ -6,6 +6,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@linkedpromo/n8n-nodes-twenty"><img src="https://badge.fury.io/js/%40linkedpromo%2Fn8n-nodes-twenty.svg" alt="npm version" /></a>
+  <a href="https://github.com/vomos-ua/n8n-nodes-twenty/actions/workflows/ci.yml"><img src="https://github.com/vomos-ua/n8n-nodes-twenty/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
   <a href="https://n8n.io"><img src="https://img.shields.io/badge/n8n-community%20node-ff6d5a" alt="n8n community node" /></a>
 </p>
@@ -25,6 +26,9 @@
 | 📦 | **Bulk Operations** | Process multiple records in a single request |
 | 🔍 | **Upsert** | Create or update based on matching field |
 | 🔔 | **Webhooks** | Real-time triggers for all CRM events |
+| 🔁 | **Auto Retry** | Automatic retries with exponential backoff for transient errors |
+| 📋 | **Dynamic Dropdowns** | Company/Person lists loaded from API in UI |
+| 🧩 | **Custom Objects** | Support for any Twenty CRM custom object |
 
 ---
 
@@ -81,6 +85,7 @@ npm install @linkedpromo/n8n-nodes-twenty
 | 📊 | **Activity** | Create, Get, Get Many, Update, Delete | Track activities and interactions |
 | 📦 | **Bulk** | Bulk Create, Bulk Update, Bulk Delete | Mass operations on records |
 | 🔍 | **Search** | Search | Find records across multiple types |
+| 🧩 | **Custom Object** | Create, Get, Get Many, Update, Delete | Work with any custom object |
 
 ### TwentyCrmTrigger Node
 
@@ -91,6 +96,57 @@ npm install @linkedpromo/n8n-nodes-twenty
 | 💰 | `opportunity.created` `opportunity.updated` `opportunity.deleted` | Deal changes |
 | ✅ | `task.created` `task.updated` `task.deleted` | Task changes |
 | 📝 | `note.created` `note.updated` `note.deleted` | Note changes |
+
+---
+
+## 🧩 Custom Objects
+
+Work with any Twenty CRM custom object using the **Custom Object** resource:
+
+1. Select **Custom Object** as the resource
+2. Enter the **Object API Name** (e.g., `customLeads`, `myCustomObject`)
+3. Provide fields as JSON
+
+```json
+{
+  "customField1": "value1",
+  "customField2": "value2"
+}
+```
+
+> 💡 Find your object's API name in **Twenty CRM Settings** → **Data Model** → **Your Object** → **API Name**
+
+---
+
+## 📋 Dynamic Dropdowns
+
+The node automatically loads data from your CRM for convenient selection:
+
+| Field | Loads From | Used In |
+|:------|:-----------|:--------|
+| **Company** | `/rest/companies` | Person → Company field |
+| **Assignee** | `/rest/people` | Task → Assignee field |
+| **Opportunities** | `/rest/opportunities` | Various relation fields |
+
+> 💡 Dropdowns show up to 60 items. For more, use the record ID directly.
+
+---
+
+## 🔁 Automatic Retry
+
+The node automatically retries failed requests for transient errors:
+
+| Status Code | Error Type | Retries |
+|:-----------:|:-----------|:-------:|
+| 429 | Rate Limit Exceeded | ✅ 3x |
+| 502 | Bad Gateway | ✅ 3x |
+| 503 | Service Unavailable | ✅ 3x |
+| 504 | Gateway Timeout | ✅ 3x |
+| Network | Connection errors | ✅ 3x |
+
+- **Exponential backoff**: 1s → 2s → 4s (with jitter)
+- **Respects `Retry-After`** header from API
+- **No retry** for client errors (400, 401, 403, 404)
 
 ---
 
@@ -191,6 +247,7 @@ The node automatically transforms simple values to Twenty's complex format:
 | 401 | Unauthorized | Invalid API key | Check credentials |
 | 404 | Not Found | Wrong endpoint | Verify API URL |
 | 400 | Bad Request | Invalid data | Check field values |
+| 429 | Rate Limited | Too many requests | Node auto-retries |
 
 ---
 
@@ -201,6 +258,27 @@ The node automatically transforms simple values to Twenty's complex format:
 | n8n | 2.4.6+ |
 | Node.js | 18.10+ |
 | Twenty CRM | API v1 |
+
+---
+
+## 🧪 Development
+
+```bash
+# Install dependencies
+npm install
+
+# Build
+npm run build
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Lint
+npm run lint
+```
 
 ---
 
