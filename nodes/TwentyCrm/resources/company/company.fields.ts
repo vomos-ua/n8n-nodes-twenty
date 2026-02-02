@@ -99,7 +99,7 @@ export const companyFields: INodeProperties[] = [
 	},
 
 	// ----------------------------------
-	//         company:create, update - Additional Fields
+	//         company:create - Additional Fields
 	// ----------------------------------
 	{
 		displayName: 'Additional Fields',
@@ -110,7 +110,7 @@ export const companyFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['company'],
-				operation: ['create', 'update'],
+				operation: ['create'],
 			},
 		},
 		options: [
@@ -150,6 +150,13 @@ export const companyFields: INodeProperties[] = [
 				description: 'Whether this is an ideal customer profile',
 			},
 			{
+				displayName: 'Industry',
+				name: 'industry',
+				type: 'string',
+				default: '',
+				description: 'Company industry',
+			},
+			{
 				displayName: 'LinkedIn URL',
 				name: 'linkedinUrl',
 				type: 'string',
@@ -167,7 +174,7 @@ export const companyFields: INodeProperties[] = [
 	},
 
 	// ----------------------------------
-	//         company:update - Name (optional)
+	//         company:update - Update Fields
 	// ----------------------------------
 	{
 		displayName: 'Update Fields',
@@ -188,6 +195,62 @@ export const companyFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'The name of the company',
+			},
+			{
+				displayName: 'Address',
+				name: 'address',
+				type: 'string',
+				default: '',
+				description: 'Company address',
+			},
+			{
+				displayName: 'Annual Recurring Revenue',
+				name: 'annualRecurringRevenue',
+				type: 'number',
+				default: 0,
+				description: 'Annual recurring revenue',
+			},
+			{
+				displayName: 'Domain Name',
+				name: 'domainName',
+				type: 'string',
+				default: '',
+				description: 'Company domain (e.g., example.com)',
+			},
+			{
+				displayName: 'Employees',
+				name: 'employees',
+				type: 'number',
+				default: 0,
+				description: 'Number of employees',
+			},
+			{
+				displayName: 'Ideal Customer Profile',
+				name: 'idealCustomerProfile',
+				type: 'boolean',
+				default: false,
+				description: 'Whether this is an ideal customer profile',
+			},
+			{
+				displayName: 'Industry',
+				name: 'industry',
+				type: 'string',
+				default: '',
+				description: 'Company industry',
+			},
+			{
+				displayName: 'LinkedIn URL',
+				name: 'linkedinUrl',
+				type: 'string',
+				default: '',
+				description: 'LinkedIn company page URL',
+			},
+			{
+				displayName: 'X (Twitter) URL',
+				name: 'xUrl',
+				type: 'string',
+				default: '',
+				description: 'X (Twitter) profile URL',
 			},
 		],
 	},
@@ -298,6 +361,13 @@ export const companyFields: INodeProperties[] = [
 				type: 'boolean',
 				default: false,
 				description: 'Whether this is an ideal customer profile',
+			},
+			{
+				displayName: 'Industry',
+				name: 'industry',
+				type: 'string',
+				default: '',
+				description: 'Company industry',
 			},
 			{
 				displayName: 'LinkedIn URL',

@@ -309,11 +309,9 @@ export class TwentyCrm implements INodeType {
 
 					if (operation === 'update') {
 						const companyId = this.getNodeParameter('companyId', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
 						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
 
 						const body = transformCompanyFields(cleanObject({
-							...additionalFields,
 							...updateFields,
 						}));
 
