@@ -174,6 +174,48 @@ export const companyFields: INodeProperties[] = [
 	},
 
 	// ----------------------------------
+	//         company:create - Custom Fields
+	// ----------------------------------
+	{
+		displayName: 'Custom Fields',
+		name: 'customFieldsUi',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
+		placeholder: 'Add Custom Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['company'],
+				operation: ['create'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Field',
+				name: 'customFields',
+				values: [
+					{
+						displayName: 'Field Name',
+						name: 'fieldName',
+						type: 'string',
+						default: '',
+						description: 'Name of the custom field (API name)',
+					},
+					{
+						displayName: 'Field Value',
+						name: 'fieldValue',
+						type: 'string',
+						default: '',
+						description: 'Value of the custom field',
+					},
+				],
+			},
+		],
+	},
+
+	// ----------------------------------
 	//         company:update - Update Fields
 	// ----------------------------------
 	{
@@ -251,6 +293,48 @@ export const companyFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'X (Twitter) profile URL',
+			},
+		],
+	},
+
+	// ----------------------------------
+	//         company:update - Custom Fields
+	// ----------------------------------
+	{
+		displayName: 'Custom Fields',
+		name: 'customFieldsUi',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
+		placeholder: 'Add Custom Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['company'],
+				operation: ['update'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Field',
+				name: 'customFields',
+				values: [
+					{
+						displayName: 'Field Name',
+						name: 'fieldName',
+						type: 'string',
+						default: '',
+						description: 'Name of the custom field (API name)',
+					},
+					{
+						displayName: 'Field Value',
+						name: 'fieldValue',
+						type: 'string',
+						default: '',
+						description: 'Value of the custom field',
+					},
+				],
 			},
 		],
 	},
@@ -382,6 +466,48 @@ export const companyFields: INodeProperties[] = [
 				type: 'string',
 				default: '',
 				description: 'X (Twitter) profile URL',
+			},
+		],
+	},
+
+	// ----------------------------------
+	//         company:upsert - Custom Fields
+	// ----------------------------------
+	{
+		displayName: 'Custom Fields',
+		name: 'customFieldsUi',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
+		placeholder: 'Add Custom Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['company'],
+				operation: ['upsert'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Field',
+				name: 'customFields',
+				values: [
+					{
+						displayName: 'Field Name',
+						name: 'fieldName',
+						type: 'string',
+						default: '',
+						description: 'Name of the custom field (API name)',
+					},
+					{
+						displayName: 'Field Value',
+						name: 'fieldValue',
+						type: 'string',
+						default: '',
+						description: 'Value of the custom field',
+					},
+				],
 			},
 		],
 	},

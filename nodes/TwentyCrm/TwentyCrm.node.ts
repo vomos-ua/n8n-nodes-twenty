@@ -273,10 +273,23 @@ export class TwentyCrm implements INodeType {
 					if (operation === 'create') {
 						const name = this.getNodeParameter('name', i) as string;
 						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const customFieldsUi = this.getNodeParameter('customFieldsUi', i, {}) as IDataObject;
+
+						// Convert custom fields to flat object
+						const customFields: IDataObject = {};
+						if (customFieldsUi.customFields) {
+							const fields = customFieldsUi.customFields as Array<{ fieldName: string; fieldValue: string }>;
+							for (const field of fields) {
+								if (field.fieldName) {
+									customFields[field.fieldName] = field.fieldValue;
+								}
+							}
+						}
 
 						const body = transformCompanyFields(cleanObject({
 							name,
 							...additionalFields,
+							...customFields,
 						}));
 
 						responseData = await twentyCrmApiRequest.call(this, 'POST', endpoint, body);
@@ -310,9 +323,22 @@ export class TwentyCrm implements INodeType {
 					if (operation === 'update') {
 						const companyId = this.getNodeParameter('companyId', i) as string;
 						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const customFieldsUi = this.getNodeParameter('customFieldsUi', i, {}) as IDataObject;
+
+						// Convert custom fields to flat object
+						const customFields: IDataObject = {};
+						if (customFieldsUi.customFields) {
+							const fields = customFieldsUi.customFields as Array<{ fieldName: string; fieldValue: string }>;
+							for (const field of fields) {
+								if (field.fieldName) {
+									customFields[field.fieldName] = field.fieldValue;
+								}
+							}
+						}
 
 						const body = transformCompanyFields(cleanObject({
 							...updateFields,
+							...customFields,
 						}));
 
 						if (Object.keys(body).length === 0) {
@@ -331,6 +357,18 @@ export class TwentyCrm implements INodeType {
 						const matchValue = this.getNodeParameter('matchValue', i) as string;
 						const name = this.getNodeParameter('name', i) as string;
 						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const customFieldsUi = this.getNodeParameter('customFieldsUi', i, {}) as IDataObject;
+
+						// Convert custom fields to flat object
+						const customFields: IDataObject = {};
+						if (customFieldsUi.customFields) {
+							const fields = customFieldsUi.customFields as Array<{ fieldName: string; fieldValue: string }>;
+							for (const field of fields) {
+								if (field.fieldName) {
+									customFields[field.fieldName] = field.fieldValue;
+								}
+							}
+						}
 
 						// Try to find existing record
 						const existingRecord = await findRecordByField.call(this, 'company', matchField, matchValue);
@@ -339,6 +377,7 @@ export class TwentyCrm implements INodeType {
 							name,
 							[matchField]: matchValue,
 							...additionalFields,
+							...customFields,
 						}));
 
 						if (existingRecord && existingRecord.id) {
